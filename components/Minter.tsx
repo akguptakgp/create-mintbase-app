@@ -20,6 +20,7 @@ const FETCH_MINTER_STORE = gql`
 const Minter = () => {
   const { wallet, isConnected, details } = useWallet()
   const [coverImage, setCoverImage] = useState<File | null>(null)
+  const [pdffile, setpdffile] = useState<File | null>(null)
   const [isMinting, setIsMinting] = useState<boolean>(false)
 
   const [fetchStores, { called, loading, data }] = useLazyQuery(
@@ -45,9 +46,17 @@ const Minter = () => {
     setCoverImage(file)
   }
 
+  
+  const handlepdf = (e: any) => {
+    const file = e.target.files[0]
+
+    setpdffile(file)
+  }
+
   const onSubmit = async (data: any) => {
     if (!wallet || !wallet.minter) return
     if (!coverImage) return
+    if (!pdffile) return
 
     setIsMinting(true)
 
@@ -63,6 +72,8 @@ const Minter = () => {
       title: data.title,
       description: data.description,
     })
+
+    await wallet.minter.uploadField(MetadataField.Document, pdffile)
 
     setIsMinting(false)
 
@@ -166,6 +177,37 @@ const Minter = () => {
             </p>
           )}
         </div>
+
+        <div className="grid grid-cols-1 mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Attach PDF to mint
+          </label>
+          <div className="flex items-center justify-center w-full">
+            <label className="flex flex-col rounded-lg border-4 border-dashed w-full h-60 p-10 group text-center">
+              <div className="h-full w-full text-center flex flex-col items-center justify-center">
+                {!pdffile && (
+                  <p className="pointer-none text-gray-500 ">Select a file</p>
+                )}
+                {pdffile && (
+                  <p className="pointer-none text-gray-500">
+                    {pdffile.name}
+                  </p>
+                )}
+              </div>
+              <input
+                {...register('pdffile', { required: true })}
+                type="file"
+                className="hidden"
+                onChange={handlepdf}
+              />
+            </label>
+          </div>
+          {errors.pdffile && (
+            <p className="text-red-500 text-xs italic">
+              Please add a pdffile.
+            </p>
+          )}
+        </div>   
 
         {isMinting ? (
           <div className="w-full py-2 px-4 rounded bg-gray-200 text-center text-black font-bold mb-2">
