@@ -50,9 +50,6 @@ const MusicPlayer = () => {
 
   return (
     <>
-      {musicList.length > 0 && (
-        <PlayerWithNoSSR audioLists={musicList} autoPlay={false} />
-      )}
     </>
   )
 }
